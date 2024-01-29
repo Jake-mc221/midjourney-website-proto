@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+    <header>
+        <style>
+            canvas {
+            }
+            body {
+                background-color: rgb(0,0,0);
+                color: rgb(0,204,0);
+                font-size: 20px;
+            }
+            .cell {
+                width: 12px;
+                height: 20px;
+                display: inline-block;
+            }
+            #text-grid {
+                font-family: monospace;
+
+            }
+            
+        </style>
+    </header>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+        <input type="range" value="0" min="0" max="120" step="0.001"id="timeInp">
+        <div id="text-grid"></div>
+        <canvas></canvas>
+    <script>
+        const canvas = document.getElementsByTagName('canvas')[0];
+        const context = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            //drawText();
+        }
+
+        canvas.addEventListener('resize', resize) ;
+        resize();
+
+        const chars = ` 
+                    /dream Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas eu turpis non erat tincidunt ultrices. 
+                    /dream Aliquam accumsan neque eget vestibulum ultricies. Donec dictum, ante eget pretium luctus, tortor ex iaculis 
+                    /dream velit, quis tempus urna urna vitae libero. Sed scelerisque dui urna, et dapibus lacus malesuada quis. Proin 
+                    /dream accumsan risus id turpis blandit, a venenatis risus placerat. Cras sit amet consectetur lorem, at porta ligula. 
+                    /dream Quisque nec urna consequat, consequat lectus vel, sagittis odio. Integer in dolor ut quam euismod gravida. Nunc
+                    /dream at tincidunt enim. Praesent tellus diam, tempus at turpis in, consequat hendrerit ipsum. In sit amet aliquam nisi. 
+                    /dream Morbi sagittis tempus nulla, at ullamcorper eros pellentesque vela venenatis risus placerat. Cras sit amet consectetur lorem, at porta ligula. 
+                    /dream Quisque nec urna consequat, consequat lectus vel, sagittis odio. Integer in dolor ut quam euismod gravida. Nunc
+                    /dream at tincidunt enim. Praesent tellus diamonsequat, consequat lectus vel, sagittis odio. Integer in dolor ut quam euismod gravi
+                    /dream Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas eu turpis non erat tincidunt ultrices. 
+                    /dream Aliquam accumsan neque eget vestibulum ultricies. Donec dictum, ante eget pretium luctus, tortor ex iaculis 
+                    /dream velit, quis tempus urna urna vitae libero. Sed scelerisque dui urna, et dapibus lacus malesuada quis. Proin 
+                    /dream accumsan risus id turpis blandit, a venenatis risus placerat. Cras sit amet consectetur lorem, at porta ligula. 
+                    /dream Quisque nec urna consequat, consequat lectus vel, sagittis odio. Integer in dolor ut quam euismod gravida. Nunc
+                    /dream at tincidunt enim. Praesent tellus diam, tempus at turpis in, consequat hendrerit ipsum. In sit amet aliquam nisi. 
+                    /dream Morbi sagittis tempus nulla, at ullamcorper eros pellentesque vela venenatis risus placerat. Cras sit amet consectetur lorem, at porta ligula. 
+                    /dream Quisque nec urna consequat, consequat lectus vel, sagittis odio. Integer in dolor ut quam euismod gravida. Nunc
+                    /dream at tincidunt enim. Praesent tellus diamonsequat, consequat lectus vel, sagittis odio. Integer in dolor ut quam euismod gravi
+                    /dream Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas eu turpis non erat tincidunt ultrices. 
+                    /dream Aliquam accumsan neque eget vestibulum ultricies. Donec dictum, ante eget pretium luctus, tortor ex iaculis 
+                    /dream velit, quis tempus urna urna vitae libero. Sed scelerisque dui urna, et dapibus lacus malesuada quis. Proin 
+                    /dream accumsan risus id turpis blandit, a venenatis risus placerat. Cras sit amet consectetur lorem, at porta ligula. 
+                    /dream Quisque nec urna consequat, consequat lectus vel, sagittis odio. Integer in dolor ut quam euismod gravida. Nunc
+                    /dream at tincidunt enim. Praesent tellus diam, tempus at turpis in, consequat hendrerit ipsum. In sit amet aliquam nisi. 
+                    /dream Morbi sagittis tempus nulla, at ullamcorper eros pellentesque vela venenatis risus placerat. Cras sit amet consectetur lorem, at porta ligula. 
+                    /dream Quisque nec urna consequat, consequat lectus vel, sagittis odio. Integer in dolor ut quam euismod gravida. Nunc
+                    /dream at tincidunt enim. Praesent tellus diamonsequat, consequat lectus vel, sagittis odio. Integer in dolor ut quam euismod gravi
+                    `;
+
+        const rows = 30;
+        const cols = 100;
+
+        // const cellMap = [] 
+        // for(let x = 0;x< rows;x ++) {
+        //     cellMap[x] = [];
+        //     for (let y =0;y < cols;y++) {
+        //         const cell = document.createElement('div');
+        //         cell.classList.add('cell');
+        //         cell.setAttribute('data-row',row);
+        //         cell.setAttribute('data-col', y);
+        //         cell.innerText = getCharAt(x,y);
+        //         cellMap[x][y] = cell;
+        //     }
+        // }
+
+        const sens = chars.split(/[\n\r]/).filter(s => s.length > 0).map(s => s + ' ');
+
+        function getCharAt (x,y){
+            const si = y % sens.length;
+            const ci = Math.min(x, sens[si].length - 1)
+
+            return sens[si][ci];
+        }
+
+        function resetTextGrid() {
+            const root = document.querySelector('#text-grid')
+            for (let y = 0; y < rows; y ++) {
+                const row = document.createElement('div');
+                row.classList.add('row');
+                row.setAttribute('data-row', y)
+                root.appendChild(row);
+
+                for(let x = 0;x <cols; x ++) {
+                    row.innerHTML += `<div class="cell" data-col="${x}">${getCharAt(x,y)}</div>`;
+                }
+            }
+        }
+
+        resetTextGrid();
+
+       
+        function animate() {
+            timeInp.value = Number(timeInp.value) +0.005; 
+            drawText();
+            requestAnimationFrame(animate)
+        }
+        
+        requestAnimationFrame(animate);
+
+        timeInp.addEventListener('input', drawText);
+
+        function transform(x,y, cx, cy, time) {
+            const dx = x - cx;
+            const dy = y - cy;
+
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            const currAngle = Math.atan2(dy, dx);
+            const newAngle = currAngle - Math.pow(dist, 0.5) * time * 0.1
+
+            return [
+                cx + Math.cos(newAngle) * dist,
+                cy + Math.sin(newAngle) * dist
+            ];
+        }
+
+        function drawText() {
+            const time = Number(timeInp.value);
+
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    document.querySelector(`[data-row="${y}"] [data-col="${x}"]`).innerText = ' ';
+                }
+            }
+
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    let [nx, ny] = transform(x / cols, y / rows, 0.5, 0.5, time);
+                    nx += cols;
+                    ny += rows;
+               
+                    const char = getCharAt(x, y);
+                  
+                    const cell = document.querySelector(`[data-row="${Math.floor(ny)}"] [data-col="${Math.floor(nx)}"]`);
+                    if (cell == null) continue;
+                    cell.innerText = char;
+                
+                 }
+            }
+
+
+            // for (const cell of document.querySelectorAll('.cell')) {
+            //     const x = Number(cell.getAttribute('data-x'));
+            //     const y = Number(cell.getAttribute('data-y'));
+            //     //const [nx,ny] = transform(x,y, 80/2, 24/2,time);
+
+            //     const [nx,ny] = [x,y];
+            //     let char = ' ';
+                
+            //     if (nx >= 0 && nx < 80 && ny >= 0 && ny <= 24) {
+            //         char = getCharAt(Math.floor(nx), Math.floor(ny));
+            //     }
+
+            //     cell.innerText = char;
+            // }
+        }
+
+        function drawCanvas() {
+            const time = Number(timeInp.value)/100 ;
+            context.clearRect(0,0,canvas.width, canvas.height);
+            for(let x = 0; x < canvas.width; x += 10) {
+                for(let y= 0; y < canvas.height; y += 10) {
+                    context.fillStyle = `hsl(${(x / canvas.width) * 360},50%, 50%)`;
+                    const [tx,ty] = transform(x,y, canvas.width/2 , canvas.height/2, time);
+                    context.fillRect(tx, ty, 5, 5);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
